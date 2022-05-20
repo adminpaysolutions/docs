@@ -1,208 +1,152 @@
 openapi: 3.0.0
 info:
-  title: Proxpay API
+  title: installmentAPI-External
   version: 1.0.0
 servers:
-  - url: https://stg-api.proxpay.co/spark
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-security:
-  - bearerAuth: []      
-tags:
-  - name: transactions > withdrawals
-  - name: transactions > deposits
-  - name: customers
-  - name: merchants
-  - name: users
+  - url: http://{{server}}api
+  - url: http://localhost:5888
 paths:
-  /transactions/withdrawals/refno/{refno}:
-    get:
+  /installment/{bank}:
+    post:
       tags:
-        - transactions > withdrawals
-      summary: Get Withdrawal By Refno
-      security:
-        - bearerAuth: []
+        - default
+      summary: CreateInstallment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                Amount: '5000'
+                InstallmentTerm: '10'
+                InstallmentRate: '0.0'
+                Description: Test BAY Installment 0%
+                ReferenceOrder: '202203280009'
+                MerchantId: '17563'
+                SecretKey: QWERTY23423424
+                CardName: Panupong
+                CardNumber: '{{creditcard}}'
+                CardExpMonth: '{{expmonth}}'
+                CardExpYear: '{{expyear}}'
+                CardCVV: '{{cvv}}'
+                Email: panupong@tarad.com
+                ReturnURL: '-'
+                PostBackURL: '-'
       parameters:
         - name: apikey
           in: header
           schema:
             type: string
           example: '{{apikey}}'
-        - name: refno
+        - name: bank
           in: path
           schema:
             type: string
           required: true
-          example: PS202201180002
+          example: '{{bank}}'
       responses:
         '200':
           description: Successful response
           content:
             application/json: {}
-  /transactions/withdrawals:
-    post:
-      tags:
-        - transactions > withdrawals
-      summary: Create Withdrawal (Customer / HQ / HQ International)
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                amount: 200
-                refno: PSHQW202201180002
-                merchant_id: 3
-                customer_id: 2 (Only use for Customer Withdrawal)
-                prefer_currency: USD (Only use for HQ International Withdrawal)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: apikey
-          in: query
-          schema:
-            type: string
-          example: '{{apikey}}'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-  /transactions/deposits:
-    post:
-      tags:
-        - transactions > deposits
-      summary: Create Deposit
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                amount: 20000
-                refno: PS202201180002
-                merchant_id: 3
-                customer_id: 15
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: apikey
-          in: header
-          schema:
-            type: string
-          example: '{{apikey}}'
-        - name: apikey
-          in: query
-          schema:
-            type: string
-          example: '{{apikey}}'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-  /customers/ref-customer-id/{ref}:
+  /api/installmentinfo/{merchantid}/{bank}/{orderno}:
     get:
       tags:
-        - customers
-      summary: Get Customer By Ref
-      security:
-        - bearerAuth: []
+        - default
+      summary: GetInstallmentInfo
       parameters:
         - name: apikey
           in: header
           schema:
+            type: integer
+          example: '123456'
+        - name: secretKey
+          in: header
+          schema:
             type: string
-          example: '{{apikey}}'
-        - name: ref
+          example: QP6ElZ6ILFjRxShwDKKD
+        - name: merchantid
           in: path
           schema:
             type: integer
           required: true
-          example: '000020'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-  /customers:
-    post:
-      tags:
-        - customers
-      summary: Create Customer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                ref_customer_id: PSC00111
-                merchant_id: 10
-                name: Panupong Chantaklang
-                bank_name: SCB
-                book_bank_number: '2345678901'
-                book_bank_name: Panupong Chantaklang
-                book_bank_branch: รังสิต
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: apikey
-          in: header
+          example: '17563'
+        - name: bank
+          in: path
           schema:
             type: string
-          example: '{{apikey}}'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-  /merchants/ref-merchant-id/{ref}:
-    get:
-      tags:
-        - merchants
-      summary: Get Merchant By Ref
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: apikey
-          in: header
-          schema:
-            type: string
-          example: '{{apikey}}'
-        - name: ref
+          required: true
+          example: BAY
+        - name: orderno
           in: path
           schema:
             type: integer
           required: true
-          example: '34758'
+          example: '202203200009'
       responses:
         '200':
           description: Successful response
           content:
             application/json: {}
-  /users/login:
+  /api/voidinst/{bank}:
     post:
       tags:
-        - users
-      summary: Login
+        - default
+      summary: VoidInstallment
       requestBody:
         content:
           application/json:
             schema:
               type: object
               example:
-                username: '{{user}}'
-                password: '{{pass}}'
+                Amount: '5000'
+                InstallmentTerm: '6'
+                ReferenceOrder: '202203200005'
+                MerchantId: '17563'
+                SecretKey: QWERTY23423424
       parameters:
         - name: apikey
           in: header
           schema:
+            type: integer
+          example: '123456'
+        - name: Secretkey
+          in: header
+          schema:
             type: string
-          example: '{{apikey}}'
+          example: QP6ElZ6ILFjRxShwDKKD
+        - name: bank
+          in: path
+          schema:
+            type: string
+          required: true
+          example: BAY
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/installmentrate/{merchantid}/{bank}/{amount}:
+    get:
+      tags:
+        - default
+      summary: GetInstallmentRate
+      parameters:
+        - name: merchantid
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: bank
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: amount
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: Successful response
